@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prolog Коли + GIF</title>
+  <script src="https://cdn.jsdelivr.net/npm/tau-prolog@0.3.1/modules/core.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tau-prolog@0.3.1/modules/lists.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      color: #222;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    .car-gif {
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      margin-top: 10px;
+    }
+    #results {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Prolog коли с GIF визуализация</h1>
+  <input type="text" id="query" placeholder="Напиши заявка, напр. is_suv(X)." />
+  <button onclick="runQuery()">Изпълни заявка</button>
+  <div id="results"></div>
+
+  <script>
+    const knowledge = `
+      car(bmw_m3).
+      car(mercedes_glc).
+      car(audi_q7).
+      car(porsche_911).
+      car(toyota_supra).
+      car(ford_mustang).
+
+      is_suv(X) :- member(X, [mercedes_glc, audi_q7]).
+      is_fast(X) :- member(X, [bmw_m3, porsche_911, toyota_supra, ford_mustang]).
+      is_german(X) :- member(X, [bmw_m3, mercedes_glc, audi_q7, porsche_911]).
+    `;
+
+    const carAnimations = {
+      bmw_m3: '<img src="https://media.giphy.com/media/l4EpblDY4w2X0XvHG/giphy.gif" class="car-gif" alt="BMW M3" />',
+      mercedes_glc: '<img src="https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.gif" class="car-gif" alt="Mercedes GLC" />',
+      audi_q7: '<img src="https://media.giphy.com/media/2A75RyXVzzSI2bx4Gj/giphy.gif" class="car-gif" alt="Audi Q7" />',
+      porsche_911: '<img src="https://media.giphy.com/media/65S0vnYwMTVKo/giphy.gif" class="car-gif" alt="Porsche 911" />',
+      toyota_supra: '<img src="https://media.giphy.com/media/kqsZyBAVnG7SM/giphy.gif" class="car-gif" alt="Toyota Supra" />',
+      ford_mustang: '<img src="https://media.giphy.com/media/e7kkO7fLbcUEM/giphy.gif" class="car-gif" alt="Ford Mustang" />'
+    };
+
+    let session;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      session = pl.create();
+      session.consult(knowledge);
+    });
+
+    function runQuery() {
+      const input = document.getElementById('query').value.trim();
+      const results = document.getElementById('results');
+      results.innerHTML = '';
+
+      session.query(input, {
+        success: function() {
+          session.answers(answer => {
+            if (answer === false) {
+              results.innerHTML += "<p>Няма повече резултати.</p>";
+              return;
+            }
+
+            const formatted = session.format_answer(answer);
+            const match = formatted.match(/X = (\w+)/);
+            let car = match ? match[1] : null;
+
+            if (car && carAnimations[car]) {
+              results.innerHTML += `<p><strong>${formatted}</strong></p>${carAnimations[car]}`;
+            } else {
+              results.innerHTML += `<p><strong>${formatted}</strong></p>`;
+            }
+          });
+        },
+        error: function(err) {
+          results.innerHTML = `<p>⚠️ Грешка в заявката: ${err}</p>`;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
