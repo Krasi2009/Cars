@@ -1,0 +1,2 @@
+car(lamborghini_huracan).
+is_fast(lamborghini_huracan).
